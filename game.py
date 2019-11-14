@@ -1,31 +1,30 @@
-from board import *
+#N = 3
 
 def softmax(x):
     p = np.exp(x)
     p = p/sum(p)
+    #assert(np.where(p>=0 && p <=1, 0.0, 1.0) = np.zeroslike(p))
+    #assert(np.sum(p) == 1)
     return p
 
 class Random_Agent(object):
     #for connect3
     def __init__(self):
-        n = 3
+        n = N
         self.actionspace = range(n*n)
     def gen_move(self, env):
         p = np.random.randn(len(self.actionspace))
         p = softmax(p)
-        #assert(np.where(p>=0 && p <=1, 0.0, 1.0) = np.zeroslike(p))
-        #assert(np.sum(p) == 1)
-        #print(env.valid_mask().reshape(-1))
-        p = np.where(env.valid_mask().reshape(-1) == 1, p, 0)
+        p = np.where(env.valid_mask() == 1, p, 0)
         p = p/sum(p)
         #print(p)
         pos = np.argmax(p)
         #print(pos)
-        return (pos//3, pos%3)
+        return pos
 
 
 class Game(object):
-    def __init__(self, p1, p2, N = 3):
+    def __init__(self, p1, p2, N = N):
         self.p1 = p1
         self.p2 = p2
         #self.pcur = p1
@@ -62,7 +61,7 @@ class Game(object):
             records.append(self.play())
         return records
 
-    def play2n(self, num_games):
+    def play2n_symmetric(self, num_games):
         p1_first_records = self.playn(num_games)
         self.p1, self.p2 = self.p2, self.p1
         p2_first_records = self.playn(num_games)

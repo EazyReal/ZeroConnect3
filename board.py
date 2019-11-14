@@ -1,22 +1,28 @@
 import numpy as np
 
+N = 3
+
 class Env(object):
     #connect3 environment
     #0 = no play
     #1 = black
     #-1 = white
-    def __init__(self, n = 3):
+    def __init__(self, n = N):
         #params
         self.n = n
         self.n2 = n*n
         self.winn = self.n
         #board related
-        self.board = np.zeros((n,n)).astype(int)
+        self.board = np.zeros(self.n2).astype(int)
         self.stones = 0
     def __str__(self):
-        return str(self.board)
+        #where is so convenient
+        tmp = np.where(self.board.reshape(N,N) == 1, 'o', self.board.reshape(N,N))
+        tmp = np.where(tmp == '-1', 'x', tmp)
+        tmp = np.where(tmp == '0', '.', tmp)
+        return str(tmp)
     def reset(self):
-        self.board = np.zeros((self.n,self.n)).astype(int)
+        self.board = np.zeros(self.n2).astype(int)
         self.stones = 0
 
     def player_to_move(self):
@@ -38,38 +44,26 @@ class Env(object):
     def valid_actions(self):
         if(self.stones == self.n2): return None
         ret = list()
-        for i in range(self.n):
-            for j in range(self.n):
-                if(self.board[i][j] == 0):
-                    ret.append((i,j))
+        for i in range(self.n2):
+            if(self.board[i] == 0):
+                ret.append(i)
         return ret
 
     def take_action(self, player, pos):
-        (x, y) = pos
-        if self.board[x][y] != 0:
+        if self.board[pos] != 0:
             return None
-        self.board[x][y] = player
+        self.board[pos] = player
         status = self.check()
         #print(board)
         self.stones += 1
         return status
 
     def check(self):
-        s0 = np.sum(self.board, axis = 0)
-        s1 = np.sum(self.board, axis = 1)
-        d0 = np.sum(self.board.diagonal())
-        d1 = np.sum(np.flip(self.board, 0).diagonal())
-        all_sum = np.r_[s0.reshape(-1), s1.reshape(-1), np.asarray([d0, d1])]
-        #print(all_sum)
-        if self.winn in all_sum:
-            return 1
-        elif -self.winn in all_sum:
-            return -1;
-        else:
-            return 0;
-        s1 = np.sum(self.board, axis = 1)
-        d0 = np.sum(self.board.diagonal())
-        d1 = np.sum(np.flip(self.board, 0).diagonal())
+        board2d = self.board.reshape(N,N)
+        s0 = np.sum(board2d, axis = 0)
+        s1 = np.sum(board2d, axis = 1)
+        d0 = np.sum(board2d.diagonal())
+        d1 = np.sum(np.flip(board2d, 0).diagonal())
         all_sum = np.r_[s0.reshape(-1), s1.reshape(-1), np.asarray([d0, d1])]
         #print(all_sum)
         if self.winn in all_sum:
