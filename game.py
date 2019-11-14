@@ -1,4 +1,22 @@
-#N = 3
+N = 3
+
+class Human_Agent(object):
+    def __init__(self):
+        pass
+    def gen_move(self,env):
+        print(env)
+        while True:
+            cmd = input("input move (x, y) as 3*x=y (0-indexed):")
+            pos = int(cmd)
+            if not pos in range(N*N):
+                print("not in range(0, N*N)!!")
+                continue
+            if not pos in env.valid_actions():
+                print("occupied!!")
+                continue
+            break
+        return pos
+
 
 def softmax(x):
     p = np.exp(x)
@@ -6,6 +24,7 @@ def softmax(x):
     #assert(np.where(p>=0 && p <=1, 0.0, 1.0) = np.zeroslike(p))
     #assert(np.sum(p) == 1)
     return p
+
 
 class Random_Agent(object):
     #for connect3
