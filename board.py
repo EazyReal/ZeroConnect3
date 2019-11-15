@@ -42,21 +42,24 @@ class Env(object):
         return np.where(self.board == 0, 1, 0);
 
     def valid_actions(self):
-        if(self.stones == self.n2): return None
+        if(self.stones == self.n2): return list()
         ret = list()
         for i in range(self.n2):
             if(self.board[i] == 0):
                 ret.append(i)
         return ret
 
-    def take_action(self, player, pos):
+    def set_board(self, value, pos): #better not use
+        self.board[pos] = value
+        return self.status()
+
+    def take_action(self, pos):
         if self.board[pos] != 0:
             return None
-        self.board[pos] = player
-        status = self.check()
+        self.board[pos] = self.player_to_move()
         #print(board)
         self.stones += 1
-        return status
+        return self.status()
 
     def check(self):
         board2d = self.board.reshape(N,N)

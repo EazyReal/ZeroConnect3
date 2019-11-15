@@ -1,3 +1,5 @@
+from board import *
+
 N = 3
 
 class Human_Agent(object):
@@ -6,7 +8,7 @@ class Human_Agent(object):
     def gen_move(self,env):
         print(env)
         while True:
-            cmd = input("input move (x, y) as 3*x=y (0-indexed):")
+            cmd = input("input move (x, y) as 3*x+y (0-indexed):")
             pos = int(cmd)
             if not pos in range(N*N):
                 print("not in range(0, N*N)!!")
@@ -29,12 +31,25 @@ def softmax(x):
 class Random_Agent(object):
     #for connect3
     def __init__(self):
-        n = N
-        self.actionspace = range(n*n)
+        self.n = N
     def gen_move(self, env):
-        p = np.random.randn(len(self.actionspace))
+        cur = env.player_to_move()
+        #if can win , win
+        for move in env.valid_actions():
+            if env.set_board(cur, move) == cur:
+                env.set_board(0, move)
+                return move
+            env.set_board(0, move)
+        #if enemy can win, stop him
+        for move in env.valid_actions():
+            if env.set_board(-cur, move) == -cur:
+                env.set_board(0, move)
+                return move
+            env.set_board(0, move)
+
+        p = np.random.randn(self.n*self.n)
         p = softmax(p)
-        p = np.where(env.valid_mask() == 1, p, 0)
+        p = np.where(env.valid_mask() == 1, p, 1e-10)
         p = p/sum(p)
         #print(p)
         pos = np.argmax(p)
@@ -46,22 +61,17 @@ class Game(object):
     def __init__(self, p1, p2, N = N):
         self.p1 = p1
         self.p2 = p2
-        #self.pcur = p1
-        self.env = Env(N)
 
-    def display_play(self, record):
+    @staticmethod
+    def display(record):
         (winner, rec) = record
         display_env = Env()
         for c, pos in rec:
-            display_env.take_action(c,pos)
+            display_env.take_action(pos)
             print(display_env)
 
-    def reset(self):
-        self.env.reset()
-
     def play(self):
-        env = self.env
-        env.reset()
+        env = Env(N)
 
         record = list()
         while env.status() == -2: #not ended
@@ -70,7 +80,7 @@ class Game(object):
             pos = pcur.gen_move(env) #if pass env, may involve in copy env, care the cost
             assert(pos in env.valid_actions())
             record.append([c, pos])
-            env.take_action(c, pos)
+            env.take_action(pos)
 
         return (env.status(), record)
 
